@@ -1,0 +1,157 @@
+#include <GL/glut.h>
+#include <cmath>
+
+// Rotation angles for each planet
+float mercuryAngle = 0.0f, venusAngle = 0.0f, earthAngle = 0.0f, marsAngle = 0.0f;
+float jupiterAngle = 0.0f, saturnAngle = 0.0f, uranusAngle = 0.0f, neptuneAngle = 0.0f;
+
+void drawOrbit(float radius) {
+    glColor3f(1.0f, 1.0f, 1.0f); // White color for orbits
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < 360; i++) {
+        float angle = 2.0f * M_PI * i / 360;
+        glVertex2f(radius * cosf(angle), radius * sinf(angle));
+    }
+    glEnd();
+}
+
+void drawPlanet(float orbitRadius, float planetRadius, float angle, float r, float g, float b) {
+    float x = orbitRadius * cosf(angle);
+    float y = orbitRadius * sinf(angle);
+
+    glPushMatrix();
+    glTranslatef(x, y, 0.0f);
+    glColor3f(r, g, b); // Planet color
+    glBegin(GL_TRIANGLE_FAN); // Solid circle for the planet
+    glVertex2f(0.0f, 0.0f);
+    for (int i = 0; i <= 100; i++) {
+        float theta = 2.0f * M_PI * i / 100;
+        float px = planetRadius * cosf(theta);
+        float py = planetRadius * sinf(theta);
+        glVertex2f(px, py);
+    }
+    glEnd();
+    glPopMatrix();
+}
+
+// Draw Saturn's ring around Saturn's planet
+void drawSaturnRing(float orbitRadius, float ringRadius, float ringThickness, float angle) {
+    float saturnX = orbitRadius * cosf(angle);  // Saturn's X position
+    float saturnY = orbitRadius * sinf(angle);  // Saturn's Y position
+
+    glPushMatrix();
+    glTranslatef(saturnX, saturnY, 0.0f); // Translate to Saturn's position
+
+    // Draw the ring (outer circle)
+    glColor3f(1.0f, 1.0f, 0.5f); // Light yellow color for the ring
+    glLineWidth(3); // Make the ring thicker
+
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < 360; i++) {
+        float angle = 2.0f * M_PI * i / 360;
+        float x = ringRadius * cosf(angle);
+        float y = ringRadius * sinf(angle);
+        glVertex2f(x, y);
+    }
+    glEnd();
+
+    // Draw the inner part of the ring (slightly smaller radius for thickness effect)
+    glColor3f(0.7f, 0.7f, 0.0f); // Darker yellow for the inner part of the ring
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < 360; i++) {
+        float angle = 2.0f * M_PI * i / 360;
+        float x = (ringRadius - ringThickness) * cosf(angle);
+        float y = (ringRadius - ringThickness) * sinf(angle);
+        glVertex2f(x, y);
+    }
+    glEnd();
+
+    glPopMatrix(); // Return to the original position
+}
+
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // Draw the Sun
+    glColor3f(1.0f, 0.5f, 0.0f); // Orange color for Sun
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2f(0.0f, 0.0f);
+    for (int i = 0; i <= 100; i++) {
+        float theta = 2.0f * M_PI * i / 100;
+        float x = 0.1f * cosf(theta);
+        float y = 0.1f * sinf(theta);
+        glVertex2f(x, y);
+    }
+    glEnd();
+
+    // Draw orbits
+    drawOrbit(0.3f);  // Mercury
+    drawOrbit(0.5f);  // Venus
+    drawOrbit(0.7f);  // Earth
+    drawOrbit(0.9f);  // Mars
+    drawOrbit(1.2f);  // Jupiter
+    drawOrbit(1.5f);  // Saturn
+    drawOrbit(1.8f);  // Uranus
+    drawOrbit(2.1f);  // Neptune
+
+    // Draw planets
+    drawPlanet(0.3f, 0.03f, mercuryAngle, 0.5f, 0.5f, 0.5f); // Mercury
+    drawPlanet(0.5f, 0.05f, venusAngle, 1.0f, 0.5f, 0.0f);   // Venus
+    drawPlanet(0.7f, 0.06f, earthAngle, 0.0f, 0.0f, 1.0f);   // Earth
+    drawPlanet(0.9f, 0.04f, marsAngle, 1.0f, 0.0f, 0.0f);    // Mars
+    drawPlanet(1.2f, 0.1f, jupiterAngle, 0.65f, 0.16f, 0.16f); // Jupiter
+    drawPlanet(1.5f, 0.09f, saturnAngle, 1.0f, 1.0f, 0.0f);  // Saturn
+    drawPlanet(1.8f, 0.07f, uranusAngle, 0.0f, 1.0f, 0.0f);  // Uranus
+    drawPlanet(2.1f, 0.08f, neptuneAngle, 0.0f, 0.0f, 1.0f); // Neptune
+
+    // Draw Saturn's ring around Saturn's planet (orbit radius 1.5f, ring radius 0.13f, ring thickness 0.02f)
+    drawSaturnRing(1.5f, 0.13f, 0.02f, saturnAngle);
+    glutSwapBuffers();
+}
+
+void update(int value) {
+    // Update the rotation angles for planets
+    mercuryAngle += 0.02f;  // Slow down Mercury's speed
+    venusAngle += 0.016f;   // Slow down Venus' speed
+    earthAngle += 0.01f;    // Slow down Earth's speed
+    marsAngle += 0.006f;    // Slow down Mars' speed
+    jupiterAngle += 0.004f; // Slow down Jupiter's speed
+    saturnAngle += 0.003f;  // Slow down Saturn's speed
+    uranusAngle += 0.002f;  // Slow down Uranus' speed
+    neptuneAngle += 0.0016f;// Slow down Neptune's speed
+
+
+    // Reset angles to prevent overflow
+    if (mercuryAngle > 2.0f * M_PI) mercuryAngle -= 2.0f * M_PI;
+    if (venusAngle > 2.0f * M_PI) venusAngle -= 2.0f * M_PI;
+    if (earthAngle > 2.0f * M_PI) earthAngle -= 2.0f * M_PI;
+    if (marsAngle > 2.0f * M_PI) marsAngle -= 2.0f * M_PI;
+    if (jupiterAngle > 2.0f * M_PI) jupiterAngle -= 2.0f * M_PI;
+    if (saturnAngle > 2.0f * M_PI) saturnAngle -= 2.0f * M_PI;
+    if (uranusAngle > 2.0f * M_PI) uranusAngle -= 2.0f * M_PI;
+    if (neptuneAngle > 2.0f * M_PI) neptuneAngle -= 2.0f * M_PI;
+
+
+    glutPostRedisplay();
+    glutTimerFunc(16, update, 0); // Call update every 16ms (~60 FPS)
+}
+
+void init() {
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black background
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(-2.5, 2.5, -2.5, 2.5); // Orthographic projection
+}
+
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitWindowSize(800, 800);
+    glutCreateWindow("Solar System");
+
+    init();
+    glutDisplayFunc(display);
+    glutTimerFunc(16, update, 0);
+    glutMainLoop();
+    return 0;
+}
